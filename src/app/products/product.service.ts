@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable, catchError, tap, throwError } from "rxjs";
+import { Observable, catchError, tap, throwError, map } from "rxjs";
+
 import { Product } from "./product";
 
 @Injectable({
@@ -12,9 +13,20 @@ export class ProductService {
   constructor(private http: HttpClient) { }
 
   getProducts(): Observable<Product[]> {
-      return this.http.get<Product[]>(this.productUrl).pipe(
-      tap(data => console.log('All: ', JSON.stringify(data))),
-      catchError(this.handleError)
+      return this.http.get<Product[]>(this.productUrl)
+        .pipe(
+          tap(data => console.log('All: ', JSON.stringify(data))),
+          catchError(this.handleError)
+      );
+  }
+
+  // Get one product
+  // Since we are working with a json file, we can only retrieve all products
+  // So retrieve all products and then find the one we want using 'map'
+  getProduct(id: number): Observable<Product | undefined> {
+    return this.getProducts()
+      .pipe(
+        map((products: Product[]) => products.find(p => p.productId === id))
       );
   }
 
